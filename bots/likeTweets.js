@@ -7,39 +7,43 @@ const likeTweets = async (botId) => {
         let limitCount = 0;
         console.log("Liking Tweets..........");
         const userID = process.env.MYID;
-        let tweets = await Tweet.find({ botId, liked: false });
-        let totalTweets = await Tweet.find({ botId });
 
         const likeFunc = async index => {
+            let tweets = await Tweet.find({ botId, liked: false });
+            let totalTweets = await Tweet.find({ botId });
             const { tweetId } = tweets[index];
             const isliked = await twitterClient.v2.like(userID, tweetId);
-            console.log(`Liked: ${tweetId} ........ ${tweets.length}/${totalTweets.length}`);
+            console.log(`Liked: ${tweetId} ........ ${(totalTweets.length - tweets.length) + 1}/${totalTweets.length}`);
 
-            if (limitCount === 4) {
+            if (index >= (tweets.length - 2)) {
+                console.log("Actions Completed........")
+            }
+            if (limitCount === 5) {
                 console.log("I have reached my limit...trying again after 15 minutes");
                 setTimeout(() => {
                     limitCount = 0;
                     console.log("Alright let's continue.....")
                     likeFunc(index);
                 }, 960000);
-            }
-            if (isliked.data.liked) {
-                limitCount += 1;
-                await Tweet.updateOne({ tweetId }, { liked: true });
-            }
-            if (isliked.errors) {
-                console.log(isliked.errors);
-            }
-            if (index < (tweets.length - 1)) {
-                likeFunc(index + 1);
-            }
-            else {
-                // finish and update bot
-                await Bot.updateOne({ botId }, {
-                    stage: 4,
-                    isFinished: true
-                });
-                console.log("Actions Completed........")
+            } else {
+                if (isliked.data.liked) {
+                    limitCount += 1;
+                    await Tweet.updateOne({ tweetId }, { liked: true });
+                }
+                if (isliked.errors) {
+                    console.log(isliked.errors);
+                }
+                if (index < (tweets.length - 1)) {
+                    likeFunc(index + 1);
+                }
+                else {
+                    // finish and update bot
+                    await Bot.updateOne({ botId }, {
+                        stage: 4,
+                        isFinished: true
+                    });
+                    console.log("Actions Completed........")
+                }
             }
         };
         likeFunc(0)
