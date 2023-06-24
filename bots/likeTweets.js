@@ -18,11 +18,10 @@ const likeTweets = async (botId) => {
                     likeFunc(index);
                 }, 960000);
             } else {
-                let tweets = await Tweet.find({ botId, liked: false });
-                let totalTweets = await Tweet.find({ botId });
+                let tweets = await Tweet.find({ liked: false });
                 const { tweetId } = tweets[index];
                 const isliked = await twitterClient.v2.like(userID, tweetId);
-                console.log(`Liked: ${tweetId} ........ ${(totalTweets.length - tweets.length) + 1}/${totalTweets.length}`);
+                console.log(`Liked: ${tweetId} ........`);
 
                 if (isliked.data.liked) {
                     limitCount += 1;
