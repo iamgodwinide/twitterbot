@@ -4,14 +4,27 @@ const Tweet = require("../model/Tweet.js");
 
 const likeTweets = async (botId) => {
     try {
+        let limitCount = 0;
         console.log("Liking Tweets..........");
         const userID = process.env.MYID;
         let tweets = await Tweet.find({ botId, liked: false });
+        let totalTweets = await Tweet.find({ botId });
+
         const likeFunc = async index => {
             const { tweetId } = tweets[index];
             const isliked = await twitterClient.v2.like(userID, tweetId);
-            console.log(isliked);
+            console.log(`Liked: ${tweetId} ........ ${tweets.length}/${totalTweets.length}`);
+
+            if (limitCount === 4) {
+                console.log("I have reached my limit...trying again after 15 minutes");
+                setTimeout(() => {
+                    limitCount = 0;
+                    console.log("Alright let's continue.....")
+                    likeFunc(index);
+                }, 960000);
+            }
             if (isliked.data.liked) {
+                limitCount += 1;
                 await Tweet.updateOne({ tweetId }, { liked: true });
             }
             if (isliked.errors) {
@@ -26,7 +39,7 @@ const likeTweets = async (botId) => {
                     stage: 4,
                     isFinished: true
                 });
-                console.log("Completed........")
+                console.log("Actions Completed........")
             }
         };
         likeFunc(0)

@@ -5,15 +5,16 @@ const getFirstTweets = require("./firsttweet.js");
 
 const getFollowers = async (targetAccountID, targetFollowers, botId, nextToken) => {
     try {
-        console.log("Gathering Followers.......")
+        console.log(`Gathering ${targetFollowers} Followers.......`)
         let followers = [];
+
         const users = await twitterClient.v2.followers(targetAccountID, {
             max_results: targetFollowers < 1000 ? targetFollowers : 1000,
             asPaginator: true,
             pagination_token: nextToken
         });
 
-        console.log("Rate Limit: ", users.rateLimit);
+        console.log(`You have ${users.rateLimit.remaining} request(s) to pull folowers left`);
 
         if (users?.data?.data) {
             followers.push(...users.data.data);
