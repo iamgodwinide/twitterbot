@@ -9,15 +9,7 @@ const likeTweets = async (botId) => {
         const userID = process.env.MYID;
 
         const likeFunc = async index => {
-            let tweets = await Tweet.find({ botId, liked: false });
-            let totalTweets = await Tweet.find({ botId });
-            const { tweetId } = tweets[index];
-            const isliked = await twitterClient.v2.like(userID, tweetId);
-            console.log(`Liked: ${tweetId} ........ ${(totalTweets.length - tweets.length) + 1}/${totalTweets.length}`);
 
-            if (index >= (tweets.length - 2)) {
-                console.log("Actions Completed........")
-            }
             if (limitCount === 5) {
                 console.log("I have reached my limit...trying again after 15 minutes");
                 setTimeout(() => {
@@ -26,6 +18,12 @@ const likeTweets = async (botId) => {
                     likeFunc(index);
                 }, 960000);
             } else {
+                let tweets = await Tweet.find({ botId, liked: false });
+                let totalTweets = await Tweet.find({ botId });
+                const { tweetId } = tweets[index];
+                const isliked = await twitterClient.v2.like(userID, tweetId);
+                console.log(`Liked: ${tweetId} ........ ${(totalTweets.length - tweets.length) + 1}/${totalTweets.length}`);
+
                 if (isliked.data.liked) {
                     limitCount += 1;
                     await Tweet.updateOne({ tweetId }, { liked: true });
