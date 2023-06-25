@@ -2,7 +2,6 @@ const { twitterClient } = require("../config/twitterClient.js");
 const Account = require("../model/Account.js");
 const Bot = require("../model/Bot.js");
 const getFirstTweets = require("./firsttweet.js");
-const likeTweets = require("./likeTweets.js");
 
 const getFollowers = async (targetAccountID, targetFollowers, botId, nextToken) => {
     try {
@@ -32,9 +31,6 @@ const getFollowers = async (targetAccountID, targetFollowers, botId, nextToken) 
                 // gather first tweets
                 const usernames = followers.map(f => f.username)
                 getFirstTweets(usernames, botId);
-                setTimeout(() => {
-                    likeTweets(botId);
-                }, 180000)
             }
         }
     } catch (e) {

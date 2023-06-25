@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 const Tweet = require('../model/Tweet');
 const Bot = require('../model/Bot');
+const likeTweets = require('./likeTweets');
 
 const getFirstTweets = async (usernames, botId) => {
     // Launch Puppeteer and create a new page
@@ -37,12 +38,8 @@ const getFirstTweets = async (usernames, botId) => {
         // Evaluate the script in the page's context
         const result = await page.evaluate(script);
         if (result) {
-            console.log(`Found tweet: ${result.targetHref}`);
+            console.log(`Found tweet: ${result.targetHref}`)
             tweets.push({ ...result, botId });
-            const newTweet = new Tweet({
-                ...result, botId
-            });
-            await newTweet.save();
         }
         if (index < (usernames.length - 1)) {
             return getTweet(index + 1);
@@ -52,7 +49,11 @@ const getFirstTweets = async (usernames, botId) => {
             // save tweets to database
             console.log(`I was able to gather ${tweets.length} tweets!`);
             if (tweets.length === 0) return;
-
+            await Tweet.insertMany(tweets);
+            // update bot state
+            await Bot.updateOne({ botId }, { stage: 3 });
+            // like tweets
+            likeTweets(botId);
         }
     }
 

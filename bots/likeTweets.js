@@ -18,7 +18,7 @@ const likeTweets = async (botId) => {
                     likeFunc(index);
                 }, 960000);
             } else {
-                let tweets = await Tweet.find({ liked: false });
+                let tweets = await Tweet.find({ liked: false, botId });
                 const { tweetId } = tweets[index];
                 const isliked = await twitterClient.v2.like(userID, tweetId);
                 console.log(`Liked: ${tweetId} ........`);

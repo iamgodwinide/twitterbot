@@ -42,6 +42,6 @@ startBot();
 
 // URLS
 app.use("/api", require("./routes/api/index.js"));
-app.use("/api/auth", require("./routes/api/auth/index.js"));
+app.use("/api/auth", require("./routes/api/auth/index"));
 
 app.listen(PORT, () => console.log(`server started on port ${PORT}`));
